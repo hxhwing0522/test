@@ -1,0 +1,177 @@
+{ //【2018-10-05 22:24:05】
+  "log": {
+    "loglevel": "warning",
+    "error": "/tmp/syslog.log",
+    "access": "/tmp/syslog.log"
+  },
+  "inbound": {
+    "tag": "tcp",
+    "port": 55501, // TCP 
+    "protocol": "vmess",
+    "settings": {
+      "clients": [
+        {
+          "id": "8f260a3d-374b-4250-a466-b88f3292ad38",
+          "alterId": 10
+        }
+      ]
+    },
+    "streamSettings": {
+      "network": "tcp",
+      "tcpSettings": {
+        "header": {
+          "type": "none"
+        }
+      }
+    }
+  },
+  "inboundDetour": [
+    {
+      "tag": "wstls",
+      "port": 55502,  // Websocks +tls，客户端加密选none即可
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {
+            "id": "8f260a3d-374b-4250-a466-b88f3292ad38",
+            "alterId": 10
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path":"/db01dc39/0b89/49be/9cc6/dde0a3466c0b"
+        },
+        "security": "tls",
+        "tlsSettings": {
+            "certificates": [
+                {
+                "keyFile": "/etc/storage/https/server.key",
+                "certificateFile": "/etc/storage/https/server.crt"
+                }
+            ]
+        }
+      }
+    },
+    {
+      "tag": "h2tls",
+      "port": 55503,  // h2 +tls，客户端加密选none即可
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {
+            "id": "8f260a3d-374b-4250-a466-b88f3292ad38",
+            "alterId": 10
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "h2",
+        "httpSettings": {
+          "path":"/db01dc39/0b89/49be/9cc6/dde0a3466c0b"
+        },
+        "security": "tls",
+        "tlsSettings": {
+            "certificates": [
+                {
+                "keyFile": "/etc/storage/https/server.key",
+                "certificateFile": "/etc/storage/https/server.crt"
+                }
+            ]
+        }
+      }
+    },
+    {
+      "tag": "kcp",
+      "port": 55511,  // kcp+utp
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {
+            "id": "8f260a3d-374b-4250-a466-b88f3292ad38",
+            "alterId": 10
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "kcp",
+        "kcpSettings": {
+          "mtu": 1350,
+          "tti": 50,
+          "uplinkCapacity": 5,
+          "downlinkCapacity": 100,
+          "congestion": false,
+          "readBufferSize": 1,
+          "writeBufferSize": 1,
+          "header": {
+            "type": "utp"
+          }
+        }
+      }
+    },
+    {
+      "tag": "ss",
+      "port": 55520, // shadowsocks 
+      "protocol": "shadowsocks",
+      "settings": {
+        "method": "chacha20-ietf",
+        "network": "tcp,udp",
+        "password": "998877"
+      }
+    }
+  ],
+  "outbound": {
+    "protocol": "freedom",
+    "settings": {}
+  },
+  "outboundDetour": [
+    {
+      "tag": "blocked", // 屏蔽
+      "protocol": "blackhole",
+      "settings": {}
+    }
+  ],
+//  "dns": {
+//    "servers": [
+//      "208.67.222.222"
+//    ]
+//  },
+  "routing": {
+    "strategy": "rules",
+    "settings": {
+      "domainStrategy": "IPIfNonMatch",
+      "rules": [
+        {
+          "outboundTag": "blocked", // 屏蔽IP
+          "type": "field",
+          "ip": [
+            "0.0.0.0/8",
+            "10.0.0.0/8",
+            "100.64.0.0/10",
+            "127.0.0.0/8",
+            "169.254.0.0/16",
+            "172.16.0.0/12",
+            "192.0.0.0/24",
+            "192.0.2.0/24",
+//            "192.168.0.0/16",
+            "198.18.0.0/15",
+            "198.51.100.0/24",
+            "203.0.113.0/24",
+            "::1/128",
+            "fc00::/7",
+            "fe80::/10"
+          ]
+        },
+        {
+          "outboundTag": "blocked",  // 测试屏蔽域名
+          "type": "field",
+          "domain": [
+//            "360.cn",
+            "360.com"
+          ]
+        }
+      ]
+    }
+  }
+}

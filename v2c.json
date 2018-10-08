@@ -1,0 +1,155 @@
+{ //【2018-09-22 22:30:30】
+  "log": {
+    "loglevel": "warning",
+    "error": "/tmp/syslog.log"
+  },
+  "inbound": {
+    "port": 1080, // socks本地代理，必须与路由器端口一致
+    "listen": "0.0.0.0",
+    "protocol": "socks",
+    "settings": {
+      "auth": "noauth",
+      "udp": true,
+      "ip": "127.0.0.1"
+    }
+  },
+  "inboundDetour": [
+    {
+      "port": "1099", // 透明代理，必须与路由器端口一致
+      "listen": "0.0.0.0",
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http", 
+          "tls"
+        ]
+      },
+      "protocol": "dokodemo-door",
+      "settings": {
+        "network": "tcp,udp",
+        "timeout": 30,
+        "followRedirect": true
+      }
+    }
+  ],
+  "outbound": { // 自行替换
+    "protocol": "vmess",
+    "settings": {
+      "vnext": [
+        {
+          "address": "domain.com", // 你的服务器域名或IP
+          "port": 12345,
+          "users": [
+            {
+              "id": "237791f4-4242-4ccc-b5de-aba8c37fb612",
+              "alterId": 100,
+              "security": "auto"
+            }
+          ]
+        }
+      ]
+    },
+    "streamSettings": {
+      "network": "kcp",
+      "kcpSettings": {
+        "mtu": 1350,
+        "tti": 50,
+        "uplinkCapacity": 5,
+        "downlinkCapacity": 100,
+        "congestion": false,
+        "readBufferSize": 1,
+        "writeBufferSize": 1,
+        "header": {
+          "type": "wechat-video"
+        }
+      }
+    },
+    "mux": {
+      "enabled": true
+    }
+  },
+  "outboundDetour": [
+    {
+      "tag": "direct", // 直连
+      "protocol": "freedom",
+      "settings": {}
+    },
+    {
+      "tag": "blocked", // 屏蔽
+      "protocol": "blackhole",
+      "settings": {}
+    }
+  ],
+  "dns": {
+    "servers": [
+      "localhost" // 路由器自行开chinadns
+    ]
+  },
+  "routing": {
+    "strategy": "rules",
+    "settings": {
+      "domainStrategy": "IPIfNonMatch",
+      "rules": [
+        {
+          "outboundTag": "direct", // 端口走直连
+          "type": "field",
+          "port": "1-52"
+        },
+        {
+          "outboundTag": "direct", // 端口走直连
+          "type": "field",
+          "port": "54-79"
+        },
+        {
+          "outboundTag": "direct", // 端口走直连
+          "type": "field",
+          "port": "81-442"
+        },
+        {
+          "outboundTag": "direct", // 端口走直连
+          "type": "field",
+          "port": "444-65535"
+        },
+        {
+          "outboundTag": "direct",  // 域名走直连
+          "type": "field",
+          "domain": [
+            "whoer.net"
+          ]
+        },
+        {
+          "outboundTag": "direct", // IP走直连
+          "type": "field",
+          "ip": [
+            "0.0.0.0/8",
+            "10.0.0.0/8",
+            "100.64.0.0/10",
+            "127.0.0.0/8",
+            "169.254.0.0/16",
+            "172.16.0.0/12",
+            "192.0.0.0/24",
+            "192.0.2.0/24",
+            "192.168.0.0/16",
+            "198.18.0.0/15",
+            "198.51.100.0/24",
+            "203.0.113.0/24",
+            "100.100.100.100/32",
+            "188.188.188.188/32",
+            "110.110.110.110/32",
+            "::1/128",
+            "fc00::/7",
+            "fe80::/10"
+          ]
+        },
+        {
+          "outboundTag": "direct", // 中国域名走直连
+          "type": "chinasites"
+        },
+        {
+          "outboundTag": "direct", // 中国IP走直连
+          "type": "chinaip"
+        }
+      ]
+    }
+  }
+}
