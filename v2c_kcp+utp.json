@@ -1,10 +1,10 @@
-{ //【2018-09-22 22:30:30】
+{ //【2018-10-11 13:15:21】
   "log": {
     "loglevel": "warning",
     "error": "/tmp/syslog.log"
   },
   "inbound": {
-    "port": 1080, // socks本地代理，必须与路由器端口一致
+    "port": 1080, // socks代理
     "listen": "0.0.0.0",
     "protocol": "socks",
     "settings": {
@@ -15,7 +15,7 @@
   },
   "inboundDetour": [
     {
-      "port": "1099", // 透明代理，必须与路由器端口一致
+      "port": "1099", // 透明代理
       "listen": "0.0.0.0",
       "sniffing": {
         "enabled": true,
@@ -32,17 +32,17 @@
       }
     }
   ],
-  "outbound": { // 自行替换
+  "outbound": {
     "protocol": "vmess",
     "settings": {
       "vnext": [
         {
-          "address": "domain.com", // 你的服务器域名或IP
-          "port": 12345,
+          "address": "mydomain.com",
+          "port": 55511,
           "users": [
             {
-              "id": "237791f4-4242-4ccc-b5de-aba8c37fb612",
-              "alterId": 100,
+              "id": "8f260a3d-374b-4250-a466-b88f3292ad38",
+              "alterId": 10,
               "security": "auto"
             }
           ]
@@ -60,7 +60,7 @@
         "readBufferSize": 1,
         "writeBufferSize": 1,
         "header": {
-          "type": "wechat-video"
+          "type": "utp" // 想伪装成什么改这个，但必须与服务端一致。
         }
       }
     },
@@ -75,7 +75,7 @@
       "settings": {}
     },
     {
-      "tag": "blocked", // 屏蔽
+      "tag": "blocked", // 去广告
       "protocol": "blackhole",
       "settings": {}
     }

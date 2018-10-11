@@ -1,0 +1,147 @@
+{ //【2018-10-11 13:15:21】
+  "log": {
+    "loglevel": "warning",
+    "error": "/tmp/syslog.log"
+  },
+  "inbound": {
+    "port": 1080, // socks代理
+    "listen": "0.0.0.0",
+    "protocol": "socks",
+    "settings": {
+      "auth": "noauth",
+      "udp": true,
+      "ip": "127.0.0.1"
+    }
+  },
+  "inboundDetour": [
+    {
+      "port": "1099", // 透明代理
+      "listen": "0.0.0.0",
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http", 
+          "tls"
+        ]
+      },
+      "protocol": "dokodemo-door",
+      "settings": {
+        "network": "tcp,udp",
+        "timeout": 30,
+        "followRedirect": true
+      }
+    }
+  ],
+  "outbound": {
+    "protocol": "vmess",
+    "settings": {
+      "vnext": [
+        {
+          "address": "mydomain.com",
+          "port": 55503,
+          "users": [
+            {
+              "id": "8f260a3d-374b-4250-a466-b88f3292ad38",
+              "alterId": 10,
+              "security": "none"
+            }
+          ]
+        }
+      ]
+    },
+    "streamSettings": {
+      "network": "h2",
+      "httpSettings": {
+        "path":"/db01dc39/0b89/49be/9cc6/dde0a3466c0b"
+      },
+      "security": "tls" // 服务端需要有证书
+    },
+    "mux": {
+      "enabled": true
+    }
+  },
+  "outboundDetour": [
+    {
+      "tag": "direct", // 直连
+      "protocol": "freedom",
+      "settings": {}
+    },
+    {
+      "tag": "blocked", // 去广告
+      "protocol": "blackhole",
+      "settings": {}
+    }
+  ],
+  "dns": {
+    "servers": [
+      "localhost" // 路由器自行开chinadns
+    ]
+  },
+  "routing": {
+    "strategy": "rules",
+    "settings": {
+      "domainStrategy": "IPIfNonMatch",
+      "rules": [
+        {
+          "outboundTag": "direct", // 端口走直连
+          "type": "field",
+          "port": "1-52"
+        },
+        {
+          "outboundTag": "direct", // 端口走直连
+          "type": "field",
+          "port": "54-79"
+        },
+        {
+          "outboundTag": "direct", // 端口走直连
+          "type": "field",
+          "port": "81-442"
+        },
+        {
+          "outboundTag": "direct", // 端口走直连
+          "type": "field",
+          "port": "444-65535"
+        },
+        {
+          "outboundTag": "direct",  // 域名走直连
+          "type": "field",
+          "domain": [
+            "whoer.net"
+          ]
+        },
+        {
+          "outboundTag": "direct", // IP走直连
+          "type": "field",
+          "ip": [
+            "0.0.0.0/8",
+            "10.0.0.0/8",
+            "100.64.0.0/10",
+            "127.0.0.0/8",
+            "169.254.0.0/16",
+            "172.16.0.0/12",
+            "192.0.0.0/24",
+            "192.0.2.0/24",
+            "192.168.0.0/16",
+            "198.18.0.0/15",
+            "198.51.100.0/24",
+            "203.0.113.0/24",
+            "100.100.100.100/32",
+            "188.188.188.188/32",
+            "110.110.110.110/32",
+            "::1/128",
+            "fc00::/7",
+            "fe80::/10"
+          ]
+        },
+        {
+          "outboundTag": "direct", // 中国域名走直连
+          "type": "chinasites"
+        },
+        {
+          "outboundTag": "direct", // 中国IP走直连
+          "type": "chinaip"
+        }
+      ]
+    }
+  }
+}
